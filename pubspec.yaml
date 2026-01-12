@@ -1,0 +1,38 @@
+name: cellcom_remote
+description: Cellcom TV Remote with Secure ADB
+publish_to: 'none'
+version: 1.0.1+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # ספריות רשת ואישורים
+  network_info_plus: ^5.0.1
+  permission_handler: ^11.0.1
+  # ספריות לטיפול בפרוטוקול ADB המאובטח
+  crypto: ^3.0.3
+  rsa_pkcs: ^2.0.0
+  # חדש - להעלאת תמונות
+  image_picker: ^1.1.2
+  http: ^1.2.2
+  image: ^4.2.0
+  # חדש - לעיבוד תמונות
+  path_provider: ^2.1.1
+  # חדש - Google Generative AI
+  google_generative_ai: ^0.4.2
+  # ניהול bookmakers
+  shared_preferences: ^2.2.2
+  # טעינת תמונות מרשת
+  cached_network_image: ^3.3.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+
