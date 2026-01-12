@@ -706,6 +706,7 @@ STEP-BY-STEP:
 ''';
 
 
+
         final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=$apiKey');
         
         final requestBody = {
