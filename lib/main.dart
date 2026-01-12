@@ -7,6 +7,7 @@
   import 'package:image/image.dart' as img;
   import 'package:http/http.dart' as http;
   import 'dart:ui';
+  import 'package:palette_generator/palette_generator.dart';
 
   void main() {
     runApp(const BetFlowApp());
@@ -14,6 +15,31 @@
 
   // Defining a custom emerald color to use throughout the app
   const Color emeraldColor = Color(0xFF10B981);
+  const String sportingbetLogoBase64 =
+      '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';
+
+  const String betwarriorLogoBase64 =
+      'iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAk1BMVEX/OQD////iMwj3IAD+LADvqpb/NgD7LwD61svznoj/+/X2mYP+9/L3SiP/KAD9KwD3wbT0TSL78en429D+//z0qpfGLAr3OwD2Rxz6QRLyhmz6zsH4597zmoH47OT0o5Dzd1n1tqPzWzj0RhD2f2byaUXxj3X2wbb4va7yYkDzVi3uel3za0z1xbX2RRTzPwH51sNCzYuzAAAEWUlEQVR4nO3cf1eqMADGcRXairwtNdOUTO3mLdO67//VXbOigQOJsXUfzvP9M+i4z1GYP2Ct606zu251Ws2uQyF8FOJHIX4U4kchfhTiRyF+FOJHIX4U4kchfhTiRyF+FOJHIX4U4kchfhTiRyF+FOJHIX4U4kchfhTiRyF+FOJHIX4U4kchfhTiRyF+FOJHoVUiU8Gmwz1a5r9+O3dCEarR+JfeWNua3pJ0o+3y9UcZWiCdCcPRZBr3u1rRVCZb5TTqGopuw2SXIPnn2eCupyoPxJVQzeN2tlNNeHqwdd+ZJoy0v3fPg6ojcSRUt4bhWwjb7UVVohthODEN30rYvqv4QnUiFL3INHw7YbSsdrpxIlSXxuHbCduP1Z5EF0Jx33Uh7N5UehJdCMPf5uFbCtsP/4/wzI1wFZoe7VhOhCduhOcUGqOwShS2KNxHYdnshCK8+Ex79OYIhepNFpfv/dHeNTZGGI4vtUFcfX1+a4pQPvX1h48aJxTr9AeI5glHg/TDN04YrjIP3zihzDyFjROKXvbhmyYMnxsvPKeQQgoppJBCCimkkEIKKaSQQgoppJBCCin0IVQNFwp1f3h9bVoo1PIKVijU69B4deaXUATL7QHQ8+8Wm6pCoV4Wh4NPCXfP39S00e9vTyp7dV45oVC9At9eKOSD0ef9F1KZGUYZoVLLRd7r80N4oTY5Pv+/co9TP+OXEU7vH4t97fZtvs//lQph+lAsIewe8+12Kdro/WqTi9ShWEJom/8rhgL9FdVIYepQ9CCc+L+uLZx7Fa5/4Ep2NfQo3MqCkbgStoLkHbRzYfzyI/fMiNfP87tj4dXluOI9iLZX0CaHolvh9EFVvcnS+hrhz0PRpXCwkdVvIrW/CvrjDao7YTwPbO4Ethd+zIquhPFKVpoGaxS21NydsH82svPVc63+/lB0IYyGNzZ3cb9Xy90Ib7Ni/cKrxX3lE6hWLcK3Q/F7wm3ON1Gab9u7qMFX1x0lu1nxO8LTTZDzbWKSxQSYqaZ7ZtSwxN0IHw3mMsz7RvhzF5sJMFNddwXJv1/viwuF8bOU+d95a7vUVV1Coa1oUSCcrYL92b9AOJsEthNEKp93dmmzW66wf2Y5wR/kUdgdviSzW45wt0tdJ5gkf8JFTxu8WbgY1+7zJ8zMbibhdu3A50s4XWZm70Ph6ZPVJ4j8fAh3E3x28FnhwO4TUlHuhYNnw+ydFsaTuk+gWq5XjZiZB6+0L5P7K6t1oI7lZG2TdZQMPjAPXiaLg3RrnwAzuVmf5v3WvaKPr/J9CZvo5LX6GlflcrOKktpM40Hh7C3kedyfPa7r+YRUlKOVsIQaySOzWzj6deNkAsz0k6sKWi6mVzKum4gfhfhRiB+F+FGIH4X4UYgfhfhRiB+F+FGIH4X4UYgfhfhRiB+F+FGIH4X4UYgfhfhRiB+F+FGIH4X4UYgfhfhRiB+F+FGIH4X4UYgfhfhRiF+ndd1pdtf/AI24WBqjWuzbAAAAAElFTkSuQmCC';
+
+  const String bet365LogoBase64 =
+      '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';
+
+
+  Future<Color> extractDominantColorFromBase64(String base64Image) async {
+    final bytes = base64Decode(base64Image);
+
+    final imageProvider = MemoryImage(bytes);
+
+    final palette = await PaletteGenerator.fromImageProvider(
+      imageProvider,
+      maximumColorCount: 10,
+    );
+
+    return palette.dominantColor?.color ??
+        palette.vibrantColor?.color ??
+        Colors.grey;
+  }
+
 
   class BetFlowApp extends StatelessWidget {
     const BetFlowApp({super.key});
@@ -533,7 +559,83 @@
         }),
       );
     }
+
   }
+  class BookieButton extends StatefulWidget {
+    final String name;
+    final String logoBase64;
+    final Color textColor;
+
+    const BookieButton({
+      super.key,
+      required this.name,
+      required this.logoBase64,
+      required this.textColor,
+    });
+
+    @override
+    State<BookieButton> createState() => _BookieButtonState();
+  }
+
+  class _BookieButtonState extends State<BookieButton> {
+    Color? _backgroundColor;
+
+    @override
+    void initState() {
+      super.initState();
+      _loadColor();
+    }
+
+    Future<void> _loadColor() async {
+      final color = await extractDominantColorFromBase64(widget.logoBase64);
+      if (mounted) {
+        setState(() {
+          _backgroundColor = color;
+        });
+      }
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _backgroundColor ?? Colors.grey.shade800,
+            foregroundColor: widget.textColor,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.memory(
+                  base64Decode(widget.logoBase64),
+                  width: 32,
+                  height: 32,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                widget.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+
 
   class _FloatingAsset extends StatefulWidget {
     final int delay;
@@ -620,6 +722,50 @@
         });
       }
     }
+
+    Widget _buildBookieButton({
+      required String name,
+      required String logoBase64,
+      required Color backgroundColor,
+      required Color textColor,
+    }) {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: backgroundColor,
+            foregroundColor: textColor,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.memory(
+                  base64Decode(logoBase64),
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                name,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
 
     Future<void> _analyzeImage() async {
       if (_selectedImage == null) return;
@@ -938,204 +1084,7 @@ STEP-BY-STEP:
         _annotatedImage = outputFile;
       });
     }
-    // Future<void> _createAnnotatedImage() async {
-    //   if (_selectedImage == null || _buttonPosition == null || _imageSize == null) return;
-    //
-    //   final bytes = await _selectedImage!.readAsBytes();
-    //   final image = img.decodeImage(bytes);
-    //   if (image == null) return;
-    //
-    //   // ציור כפתור אמיתי עם טקסט "sportingbet"
-    //   final x = _buttonPosition!.dx.toInt();
-    //   final y = _buttonPosition!.dy.toInt();
-    //   final buttonWidth = 180;
-    //   final buttonHeight = 50;
-    //
-    //   final buttonX = (x - buttonWidth ~/ 2).clamp(0, image.width - buttonWidth);
-    //   final buttonY = (y - buttonHeight ~/ 2).clamp(0, image.height - buttonHeight);
-    //
-    //   // ציור רקע לכפתור (מלבן מעוגל)
-    //   final buttonColor = img.ColorRgb8(16, 185, 129); // emeraldColor
-    //   final borderColor = img.ColorRgb8(255, 255, 255); // לבן למסגרת
-    //
-    //   // ציור מסגרת לבנה
-    //   img.drawRect(
-    //     image,
-    //     x1: buttonX - 2,
-    //     y1: buttonY - 2,
-    //     x2: buttonX + buttonWidth + 2,
-    //     y2: buttonY + buttonHeight + 2,
-    //     color: borderColor,
-    //   );
-    //
-    //   // ציור רקע הכפתור
-    //   img.fillRect(
-    //     image,
-    //     x1: buttonX,
-    //     y1: buttonY,
-    //     x2: buttonX + buttonWidth,
-    //     y2: buttonY + buttonHeight,
-    //     color: buttonColor,
-    //   );
-    //
-    //   // הוספת סימון ברור לכפתור - נצייר מסגרת וסימון
-    //   // ציור מסגרת כפולה סביב הכפתור
-    //   final borderThickness = 3;
-    //   for (int i = 0; i < borderThickness; i++) {
-    //     img.drawRect(
-    //       image,
-    //       x1: buttonX - i,
-    //       y1: buttonY - i,
-    //       x2: buttonX + buttonWidth + i,
-    //       y2: buttonY + buttonHeight + i,
-    //       color: img.ColorRgb8(255, 255, 0), // צהוב בוהק
-    //     );
-    //   }
-    //
-    //   // ציור קו אנכי במרכז (כדי לסמן שזה כפתור)
-    //   img.drawLine(
-    //     image,
-    //     x1: buttonX + buttonWidth ~/ 2,
-    //     y1: buttonY + 5,
-    //     x2: buttonX + buttonWidth ~/ 2,
-    //     y2: buttonY + buttonHeight - 5,
-    //     color: img.ColorRgb8(0, 0, 0), // שחור
-    //     thickness: 2,
-    //   );
-    //
-    //   // הוספת טקסט "sportingbet" על הכפתור
-    //   // נצייר את האותיות בצורה ברורה יותר - נצייר קווים עבים שייצגו את הטקסט
-    //   final text = 'sportingbet';
-    //   final textColor = img.ColorRgb8(0, 0, 0); // שחור
-    //   final textSize = 16;
-    //   final textX = buttonX + (buttonWidth - text.length * 9) ~/ 2;
-    //   final textY = buttonY + (buttonHeight + textSize) ~/ 2;
-    //
-    //   // ציור טקסט בצורה ברורה - נצייר קווים עבים שייצגו את האותיות
-    //   // נצייר קו עב עבור כל אות (כדי שיהיה ברור שזה טקסט)
-    //   for (int i = 0; i < text.length; i++) {
-    //     final charX = textX + i * 9;
-    //     // ציור קו עב עבור כל אות (כדי שיהיה ברור שזה טקסט)
-    //     img.drawLine(
-    //       image,
-    //       x1: charX,
-    //       y1: textY - 8,
-    //       x2: charX + 7,
-    //       y2: textY - 8,
-    //       color: textColor,
-    //       thickness: 3,
-    //     );
-    //     img.drawLine(
-    //       image,
-    //       x1: charX,
-    //       y1: textY,
-    //       x2: charX + 7,
-    //       y2: textY,
-    //       color: textColor,
-    //       thickness: 3,
-    //     );
-    //     img.drawLine(
-    //       image,
-    //       x1: charX,
-    //       y1: textY + 8,
-    //       x2: charX + 7,
-    //       y2: textY + 8,
-    //       color: textColor,
-    //       thickness: 3,
-    //     );
-    //   }
-    //
-    //   // הוספת חץ קטן שמצביע על הכפתור
-    //   final arrowSize = 25;
-    //   final arrowX = buttonX + buttonWidth ~/ 2;
-    //   final arrowY = buttonY - arrowSize - 8;
-    //
-    //   if (arrowY > 0) {
-    //     // ציור חץ למעלה (צהוב)
-    //     img.drawLine(
-    //       image,
-    //       x1: arrowX,
-    //       y1: arrowY,
-    //       x2: arrowX,
-    //       y2: arrowY + arrowSize,
-    //       color: img.ColorRgb8(255, 255, 0), // צהוב
-    //       thickness: 4,
-    //     );
-    //     img.drawLine(
-    //       image,
-    //       x1: arrowX,
-    //       y1: arrowY,
-    //       x2: arrowX - 10,
-    //       y2: arrowY + 10,
-    //       color: img.ColorRgb8(255, 255, 0),
-    //       thickness: 4,
-    //     );
-    //     img.drawLine(
-    //       image,
-    //       x1: arrowX,
-    //       y1: arrowY,
-    //       x2: arrowX + 10,
-    //       y2: arrowY + 10,
-    //       color: img.ColorRgb8(255, 255, 0),
-    //       thickness: 4,
-    //     );
-    //   }
-    //
-    //   // הוספת סימון לאלמנטים שצריך להזיז (אם יש)
-    //   if (_elementsToMove != null && _elementsToMove!.isNotEmpty) {
-    //     for (final element in _elementsToMove!) {
-    //       final direction = element['direction'] as String? ?? 'down';
-    //       final pixels = (element['pixels'] as num?)?.toInt() ?? 0;
-    //       final description = element['description'] as String? ?? 'element';
-    //
-    //       // נצייר חץ שמצביע על הכיוון שצריך להזיז
-    //       // זה רק הסבר ויזואלי - הזזת אלמנטים בפועל דורשת AI חזק יותר
-    //       final indicatorY = buttonY - 50;
-    //       if (indicatorY > 0) {
-    //         // ציור חץ שמצביע על הכיוון
-    //         final arrowColor = img.ColorRgb8(255, 165, 0); // כתום
-    //         if (direction == 'down') {
-    //           // חץ למטה
-    //           img.drawLine(
-    //             image,
-    //             x1: buttonX - 30,
-    //             y1: indicatorY,
-    //             x2: buttonX - 30,
-    //             y2: indicatorY + 20,
-    //             color: arrowColor,
-    //             thickness: 3,
-    //           );
-    //           img.drawLine(
-    //             image,
-    //             x1: buttonX - 30,
-    //             y1: indicatorY + 20,
-    //             x2: buttonX - 40,
-    //             y2: indicatorY + 10,
-    //             color: arrowColor,
-    //             thickness: 3,
-    //           );
-    //           img.drawLine(
-    //             image,
-    //             x1: buttonX - 30,
-    //             y1: indicatorY + 20,
-    //             x2: buttonX - 20,
-    //             y2: indicatorY + 10,
-    //             color: arrowColor,
-    //             thickness: 3,
-    //           );
-    //         }
-    //       }
-    //     }
-    //   }
-    //
-    //   // שמירת התמונה
-    //   final outputFile = File('${_selectedImage!.path}_annotated.png');
-    //   await outputFile.writeAsBytes(img.encodePng(image));
-    //
-    //   setState(() {
-    //     _annotatedImage = outputFile;
-    //   });
-    // }
+
 
     @override
     Widget build(BuildContext context) {
@@ -1149,10 +1098,58 @@ STEP-BY-STEP:
             ),
             const SizedBox(height: 20),
             const Text(
-              'Upload your app screenshot and let AI suggest the best location for a "sportingbet" button',
+              'Upload your app screenshot and let AI suggest the best location for a betting button',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, color: Colors.white54, height: 1.5),
             ),
+            const SizedBox(height: 30),
+            
+            // בחירת Bookie
+            const Text(
+              'Select Bookie:',
+              style: TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
+            
+            // כפתורי Bookies עם לוגואים (Google Favicon Service)
+            // _buildBookieButton(
+            //   name: 'Sportingbet',
+            //   logoBase64: sportingbetLogoBase64,
+            //   backgroundColor: const Color(0xFF10B981),
+            //   textColor: Colors.white,
+            // ),
+            BookieButton(
+              name: 'Sportingbet',
+              logoBase64: sportingbetLogoBase64,
+              textColor: Colors.white,
+            ),
+            const SizedBox(height: 10),
+            // _buildBookieButton(
+            //   name: 'bet365',
+            //   logoBase64: bet365LogoBase64,
+            //   backgroundColor: const Color(0xFFFFD700),
+            //   textColor: Colors.black,
+            // ),
+            BookieButton(
+              name: 'bet365',
+              logoBase64: bet365LogoBase64,
+              textColor: Colors.black,
+            ),
+
+
+            const SizedBox(height: 10),
+            // _buildBookieButton(
+            //   name: 'Betwarrior',
+            //   logoBase64: betwarriorLogoBase64,
+            //   backgroundColor: const Color(0xFFE53935),
+            //   textColor: Colors.white,
+            // ),
+            BookieButton(
+              name: 'Betwarrior',
+              logoBase64: betwarriorLogoBase64,
+              textColor: Colors.white,
+            ),
+            
             const SizedBox(height: 40),
             
             // כפתור להעלאת תמונה
