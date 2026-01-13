@@ -9,9 +9,47 @@ import 'package:http/http.dart' as http;
 import 'dart:ui';
 import 'package:palette_generator/palette_generator.dart';
 import 'config/api_keys.dart'; // API keys - gitignored
+import 'services/database_service.dart'; // Database connection
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // בדיקת חיבור לדאטהבייס
+  await testDatabaseConnection();
+  
   runApp(const BetFlowApp());
+}
+
+/// פונקציה פשוטה לבדיקת חיבור לדאטהבייס
+Future<void> testDatabaseConnection() async {
+  print('🔄 Connecting to PostgreSQL database...');
+  
+  try {
+    final connected = await databaseService.connect();
+    
+    if (connected) {
+      print('✅ Connected successfully!');
+      
+      // שליפת הלקוחות
+      final customers = await databaseService.getCustomers();
+      
+      print('📊 Found ${customers.length} customers:');
+      print('─────────────────────────────────────');
+      
+      for (var customer in customers) {
+        print('ID: ${customer['id']}');
+        print('Name: ${customer['name']}');
+        print('Countries: ${customer['countries']}');
+        print('Category: ${customer['content_category']}');
+        print('─────────────────────────────────────');
+      }
+      
+      // סגירת החיבור
+      await databaseService.close();
+    }
+  } catch (e) {
+    print('❌ Database error: $e');
+  }
 }
 
 // Defining a custom emerald color to use throughout the app
