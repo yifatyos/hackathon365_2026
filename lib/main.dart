@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -14,8 +16,10 @@ import 'services/database_service.dart'; // Database connection
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // בדיקת חיבור לדאטהבייס
-  await testDatabaseConnection();
+  // בדיקת חיבור לדאטהבייס - רק אם לא ב-Web
+  if (!kIsWeb) {
+    await testDatabaseConnection();
+  }
   
   runApp(const BetFlowApp());
 }
@@ -185,6 +189,7 @@ class _LandingPageState extends State<LandingPage> with TickerProviderStateMixin
               children: [
                 const Navbar(),
                 const HeroSection(),
+                const FilterSection(),
                 const RevenueSection(),
                 AIScannerSection(controller: _scannerController),
                 const ScreenshotAnalyzerSection(),
@@ -251,7 +256,7 @@ class Navbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.4),
         border: const Border(bottom: BorderSide(color: Colors.white10)),
@@ -259,12 +264,14 @@ class Navbar extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth < 800) {
-            // Layout for smaller screens - vertical stacking
+            // Layout for smaller screens - שתי שורות נפרדות
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                const SizedBox(height: 25), // מרווח מלמעלה - מוריד את הלוגו למטה
+                // שורה 1: לוגו בצד שמאל
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -272,12 +279,12 @@ class Navbar extends StatelessWidget {
                         gradient: const LinearGradient(colors: [emeraldColor, Colors.green]),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.attach_money, color: Colors.black),
+                      child: const Icon(Icons.attach_money, color: Colors.black, size: 16,),
                     ),
                     const SizedBox(width: 12),
                     const Text(
                       'BETFLOW',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -1),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -1),
                     ),
                     const Text(
                       ' AI',
@@ -285,14 +292,15 @@ class Navbar extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 16,
-                  runSpacing: 12,
+                // const SizedBox(height: 5), // מרווח קטן יותר בין הלוגו לכפתורים
+                // שורה 2: 3 הכפתורים
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     _navItem('How it works'),
+                    const SizedBox(width: 16),
                     _navItem('Offers'),
+                    const SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
@@ -374,7 +382,7 @@ class HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 20),
       child: Column(
         children: [
           Container(
@@ -393,7 +401,7 @@ class HeroSection extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
           const Text(
             'BIG DEALS.',
             textAlign: TextAlign.center,
@@ -414,22 +422,22 @@ class HeroSection extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           const Text(
-            'Access VIP Revshare deals instantly\nwith AI-powered optimization.',
+            'Access the highest RevShare deals in the gambling industry instantly. Our AI scans your app and generates high-converting placements, tailored to your brand.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 18, color: Colors.white54, height: 1.5),
           ),
-          const SizedBox(height: 50),
+          const SizedBox(height: 30),
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
               backgroundColor: emeraldColor,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 25),
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Start for Free', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
+                Text('Get your VIP rate NOW', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
                 SizedBox(width: 10),
                 Icon(Icons.north_east, color: Colors.black),
               ],
@@ -437,6 +445,290 @@ class HeroSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// --- Filter Section (Search & Filters) ---
+
+class FilterSection extends StatefulWidget {
+  const FilterSection({super.key});
+
+  @override
+  State<FilterSection> createState() => _FilterSectionState();
+}
+
+class _FilterSectionState extends State<FilterSection> {
+  String _selectedCountry = 'All';
+  String _selectedPayModel = 'All';
+  String _selectedCategory = 'All';
+  String _selectedTrafficType = 'All';
+  String _selectedPlatform = 'All';
+  bool _isNew = false;
+  bool _isUnique = false;
+  bool _isXmlFeeds = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      padding: const EdgeInsets.all(30),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // שורה 1 - Search + Country
+          Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  label: 'Search',
+                  controller: _searchController,
+                  icon: Icons.search,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: _buildDropdown(
+                  label: 'Country',
+                  value: _selectedCountry,
+                  items: ['All', 'US', 'UK', 'DE', 'FR', 'RU', 'IL'],
+                  onChanged: (val) => setState(() => _selectedCountry = val!),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // שורה 2 - Pay Model + Category
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdown(
+                  label: 'Pay model',
+                  value: _selectedPayModel,
+                  items: ['All', 'CPA', 'RevShare', 'Hybrid'],
+                  onChanged: (val) => setState(() => _selectedPayModel = val!),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: _buildDropdown(
+                  label: 'Category',
+                  value: _selectedCategory,
+                  items: ['All', 'Sport', 'Casino', 'Poker', 'Betting'],
+                  onChanged: (val) => setState(() => _selectedCategory = val!),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // שורה 3 - Traffic Types + Platform
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdown(
+                  label: 'Traffic types',
+                  value: _selectedTrafficType,
+                  items: ['All', 'SEO', 'PPC', 'Social', 'Email'],
+                  onChanged: (val) => setState(() => _selectedTrafficType = val!),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: _buildDropdown(
+                  label: 'Platform',
+                  value: _selectedPlatform,
+                  items: ['All', 'iOS', 'Android', 'Web', 'Desktop'],
+                  onChanged: (val) => setState(() => _selectedPlatform = val!),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // שורה 4 - Checkboxes
+          Row(
+            children: [
+              _buildCheckbox('New', _isNew, (val) => setState(() => _isNew = val!)),
+              const SizedBox(width: 30),
+              _buildCheckbox('Unique', _isUnique, (val) => setState(() => _isUnique = val!)),
+              const SizedBox(width: 30),
+              _buildCheckbox('XML-feeds', _isXmlFeeds, (val) => setState(() => _isXmlFeeds = val!)),
+            ],
+          ),
+          
+          const SizedBox(height: 30),
+          
+          // כפתורים
+          Row(
+            children: [
+              // Apply Button (Yellow)
+              ElevatedButton(
+                onPressed: () {
+                  // TODO: Apply filters
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFD700),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Apply', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              
+              const Spacer(),
+              
+              // Save Button
+              OutlinedButton(
+                onPressed: () {
+                  // TODO: Save filters
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white70,
+                  side: const BorderSide(color: Colors.white30),
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Save'),
+              ),
+              
+              const SizedBox(width: 10),
+              
+              // Reset Button
+              OutlinedButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedCountry = 'All';
+                    _selectedPayModel = 'All';
+                    _selectedCategory = 'All';
+                    _selectedTrafficType = 'All';
+                    _selectedPlatform = 'All';
+                    _isNew = false;
+                    _isUnique = false;
+                    _isXmlFeeds = false;
+                    _searchController.clear();
+                  });
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white70,
+                  side: const BorderSide(color: Colors.white30),
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Reset'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: Colors.white30, size: 20),
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.05),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: emeraldColor),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: DropdownButton<String>(
+            value: value,
+            isExpanded: true,
+            underline: const SizedBox(),
+            dropdownColor: const Color(0xFF1a1a2e),
+            style: const TextStyle(color: Colors.white),
+            icon: const Icon(Icons.unfold_more, color: Colors.white30, size: 20),
+            items: items.map((item) => DropdownMenuItem(
+              value: item,
+              child: Text(item),
+            )).toList(),
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCheckbox(String label, bool value, ValueChanged<bool?> onChanged) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: value,
+            onChanged: onChanged,
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return emeraldColor;
+              }
+              return Colors.white.withOpacity(0.1);
+            }),
+            side: BorderSide(color: Colors.white.withOpacity(0.3)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+      ],
     );
   }
 }
@@ -762,8 +1054,8 @@ class _FloatingAssetState extends State<_FloatingAsset> with SingleTickerProvide
             angle: 0.2 * _controller.value,
             child: Icon(
               math.Random().nextBool() ? Icons.attach_money : Icons.copyright_sharp,
-              color: emeraldColor.withOpacity(0.05),
-              size: 40,
+              color: emeraldColor.withOpacity(0.2),
+              size: 50,
             ),
           ),
         );
@@ -790,6 +1082,8 @@ class ScreenshotAnalyzerSection extends StatefulWidget {
 class _ScreenshotAnalyzerSectionState extends State<ScreenshotAnalyzerSection> {
   File? _selectedImage;
   File? _annotatedImage;
+  Uint8List? _selectedImageBytes; // לתמיכה ב-Web
+  Uint8List? _annotatedImageBytes; // לתמיכה ב-Web
   bool _isAnalyzing = false;
   String? _buttonLocation;
   Offset? _buttonPosition;
@@ -800,16 +1094,22 @@ class _ScreenshotAnalyzerSectionState extends State<ScreenshotAnalyzerSection> {
   double? _pushDownFromY;
   int? _pushDownPixels;
   BookieInfo? _selectedBookie; // ה-Bookie שנבחר
+  String? _aiExplanation; // הסבר AI למיקום
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-
+      final bytes = await image.readAsBytes();
+      
       setState(() {
-        _selectedImage = File(image.path);
+        _selectedImageBytes = bytes;
+        if (!kIsWeb) {
+          _selectedImage = File(image.path);
+        }
         _annotatedImage = null;
+        _annotatedImageBytes = null;
         _buttonLocation = null;
         _buttonPosition = null;
         _elementsToMove = null;
@@ -817,6 +1117,7 @@ class _ScreenshotAnalyzerSectionState extends State<ScreenshotAnalyzerSection> {
         _pushRequired = null;
         _pushDownFromY = null;
         _pushDownPixels = null;
+        _aiExplanation = null;
       });
     }
   }
@@ -866,7 +1167,7 @@ class _ScreenshotAnalyzerSectionState extends State<ScreenshotAnalyzerSection> {
 
 
   Future<void> _analyzeImage() async {
-    if (_selectedImage == null) return;
+    if (_selectedImageBytes == null) return;
     
     // בדיקה שנבחר Bookie
     if (_selectedBookie == null) {
@@ -885,15 +1186,27 @@ class _ScreenshotAnalyzerSectionState extends State<ScreenshotAnalyzerSection> {
 
     try {
       // קריאה ל-AI API
-      final result = await _callAIApi(_selectedImage!);
+      final result = await _callAIApi(_selectedImageBytes!);
 
       if (result != null) {
         // אם המודל החזיר תמונה מוכנה (image generation)
-        if (result['isImageResponse'] == true && result['imageFile'] != null) {
+        if (result['isImageResponse'] == true && result['imageBytes'] != null) {
           setState(() {
-            _annotatedImage = result['imageFile'] as File;
+            _annotatedImageBytes = result['imageBytes'] as Uint8List;
+            if (!kIsWeb && result['imageFile'] != null) {
+              _annotatedImage = result['imageFile'] as File;
+            }
             _buttonLocation = 'AI generated mockup with button inserted';
           });
+          
+          // קבלת הסבר AI למיקום
+          if (result['imageBytes'] != null) {
+            // הצג טקסט טעינה בזמן שמחכים להסבר
+            setState(() {
+              _aiExplanation = '🔄 Analyzing placement... Please wait...';
+            });
+            await _getAIExplanation(result['imageBytes'] as Uint8List);
+          }
         } else {
           // אם המודל החזיר JSON (text response) - נמשיך עם הלוגיקה הישנה
           // עיבוד בטוח של elementsToMove
@@ -938,11 +1251,10 @@ class _ScreenshotAnalyzerSectionState extends State<ScreenshotAnalyzerSection> {
     }
   }
 
-  Future<Map<String, dynamic>?> _callAIApi(File imageFile) async {
+  Future<Map<String, dynamic>?> _callAIApi(Uint8List imageBytes) async {
     try {
       const apiKey = geminiApiKey; // from config/api_keys.dart (gitignored)
 
-      final imageBytes = await imageFile.readAsBytes();
       final base64Image = base64Encode(imageBytes);
 
       // קבלת מידע על ה-Bookie שנבחר
@@ -985,29 +1297,43 @@ BUTTON DESIGN:
       }
 
       final prompt = '''
-Transform this mobile app screenshot by adding a "${bookie.name}" betting banner button.
+Add a "${bookie.name}" banner button to this mobile app screenshot.
 
-YOUR TASK:
-1. Find a VISIBLE EMPTY GAP between UI elements (NOT inside any element!)
-2. Insert a professional "${bookie.name}" banner button in that gap
-3. Return the modified screenshot with the button inserted
+⚠️ CRITICAL: DO NOT DELETE ANY CONTENT! Only ADD the banner. ⚠️
 
+STEP 1 - ANALYZE THE SCREEN:
+First, identify what's on the screen:
+- What type of app is this? (sports, betting, news, etc.)
+- What sections/categories exist?
+- Where are natural "break points" between content?
+- What has the user likely already seen vs. what's coming next?
+
+STEP 2 - STRATEGIC PLACEMENT DECISION:
+Choose the BEST location based on conversion psychology:
+- AFTER a completed event (user finished consuming that content)
+- BEFORE a new category starts (natural pause point)
+- Between leagues/sections (users expect breaks here)
+- NOT in the middle of active content the user is reading
+- NOT covering betting odds or important information
+
+STEP 3 - INSERT THE BANNER:
 $buttonDescription
 
-BANNER REQUIREMENTS:
-- Full width of the screen
-- Height: 50-70 pixels
-- Rounded corners (8-12px radius)
-- Clear, readable text
-- Professional betting app appearance
+BANNER DESIGN:
+- Full width, height: 50-70px
+- Rounded corners (10px)
+- Text: "${bookie.name} - Bet Now!" ⚽
+- Must look professional and native to the app
 
-CRITICAL RULES:
-- Do NOT cover or overlap any existing UI elements
-- Find EMPTY SPACE between elements
-- If needed, push elements down to make room
-- The button must look like a real ${bookie.name} advertisement
+ABSOLUTE RULES:
+✅ ADD banner at a strategic location
+✅ PUSH elements down if needed
+✅ Keep ALL original content visible
+❌ NEVER delete any element
+❌ NEVER cover active content
+❌ NEVER place inside a card or section
 
-Return the complete modified screenshot image.
+Return the modified screenshot with the banner strategically placed.
 ''';
 
 
@@ -1070,12 +1396,17 @@ Return the complete modified screenshot image.
                 print('✅ Found image in response! mimeType: $mimeType');
                 // המודל החזיר תמונה - נשמור אותה ישירות
                 final generatedImageBytes = base64Decode(imageDataStr);
-                final outputFile = File('${imageFile.path}_mockup.png');
-                await outputFile.writeAsBytes(generatedImageBytes);
+                
+                File? outputFile;
+                if (!kIsWeb && _selectedImage != null) {
+                  outputFile = File('${_selectedImage!.path}_mockup.png');
+                  await outputFile.writeAsBytes(generatedImageBytes);
+                }
 
                 // מחזירים את הנתונים כך שהקוד יודע שזו תמונה
                 return {
                   'imageFile': outputFile,
+                  'imageBytes': generatedImageBytes,
                   'isImageResponse': true,
                 };
               }
@@ -1105,11 +1436,102 @@ Return the complete modified screenshot image.
     }
   }
 
-  Future<void> _createAnnotatedImage() async {
-    if (_selectedImage == null || _buttonPosition == null) return;
+  /// קבלת הסבר עסקי מה-AI למה המיקום הזה הכי טוב
+  Future<void> _getAIExplanation(Uint8List imageBytes) async {
+    print('🔍 Starting AI explanation request...');
+    try {
+      const apiKey = geminiApiKey;
+      
+      final base64Image = base64Encode(imageBytes);
+      
+      final bookieName = _selectedBookie?.name ?? 'betting';
+      
+      final prompt = '''
+Analyze this app screenshot with the $bookieName banner button inserted.
 
-    final bytes = await _selectedImage!.readAsBytes();
-    final originalImage = img.decodeImage(bytes);
+FIRST, identify what UI elements you see:
+- What sections/categories are visible?
+- What content is above the banner?
+- What content is below the banner?
+- Are there completed events, live events, or upcoming events?
+
+THEN, explain WHY this specific placement is optimal:
+
+Write a professional business analysis (5-7 lines) that includes:
+1. What you identified on the screen (e.g., "The banner is placed after the German Bundesliga section...")
+2. Why this location makes sense psychologically (e.g., "Users have finished viewing X and are transitioning to Y...")
+3. How this maximizes conversion (e.g., "This creates a natural call-to-action moment...")
+
+Format your response like this:
+"📍 Placement: [Where exactly the banner is located]
+🎯 Why here: [The strategic reasoning based on content flow]
+💰 Conversion insight: [Why this will drive clicks]"
+''';
+
+      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey');
+      
+      final requestBody = {
+        'contents': [
+          {
+            'parts': [
+              {'text': prompt},
+              {
+                'inline_data': {
+                  'mime_type': 'image/png',
+                  'data': base64Image,
+                }
+              }
+            ]
+          }
+        ],
+        'generationConfig': {
+          'temperature': 0.7,
+          'maxOutputTokens': 300,
+        }
+      };
+      
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        if (data['candidates'] != null && 
+            data['candidates'].isNotEmpty &&
+            data['candidates'][0]['content'] != null &&
+            data['candidates'][0]['content']['parts'] != null &&
+            data['candidates'][0]['content']['parts'].isNotEmpty) {
+          
+          final text = data['candidates'][0]['content']['parts'][0]['text'];
+          
+          if (text != null) {
+            print('✅ Got AI explanation: ${text.toString().substring(0, 100)}...');
+            setState(() {
+              _aiExplanation = text.toString().trim();
+            });
+          } else {
+            print('⚠️ AI explanation text was null');
+          }
+        }
+      }
+    } catch (e) {
+      print('❌ Error getting AI explanation: $e');
+      // נציג הודעה אם יש שגיאה
+      if (mounted) {
+        setState(() {
+          _aiExplanation = '⚠️ Could not generate explanation. Please try again.';
+        });
+      }
+    }
+  }
+
+  Future<void> _createAnnotatedImage() async {
+    if (_selectedImageBytes == null || _buttonPosition == null) return;
+
+    final originalImage = img.decodeImage(_selectedImageBytes!);
     if (originalImage == null) return;
 
     // יצירת תמונה חדשה עם גובה נוסף אם צריך לדחוף
@@ -1236,10 +1658,16 @@ Return the complete modified screenshot image.
       );
     }
 
-    final outputFile = File('${_selectedImage!.path}_annotated.png');
-    await outputFile.writeAsBytes(img.encodePng(image));
+    final pngBytes = Uint8List.fromList(img.encodePng(image));
+    
+    File? outputFile;
+    if (!kIsWeb && _selectedImage != null) {
+      outputFile = File('${_selectedImage!.path}_annotated.png');
+      await outputFile.writeAsBytes(pngBytes);
+    }
 
     setState(() {
+      _annotatedImageBytes = pngBytes;
       _annotatedImage = outputFile;
     });
   }
@@ -1301,7 +1729,7 @@ Return the complete modified screenshot image.
             ),
           ),
 
-          if (_selectedImage != null) ...[
+          if (_selectedImageBytes != null) ...[
             const SizedBox(height: 30),
             // תצוגת התמונה המקורית
             Container(
@@ -1312,7 +1740,7 @@ Return the complete modified screenshot image.
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.file(_selectedImage!),
+                child: Image.memory(_selectedImageBytes!),
               ),
             ),
             const SizedBox(height: 20),
@@ -1344,23 +1772,60 @@ Return the complete modified screenshot image.
               ),
           ],
 
-          if (_annotatedImage != null) ...[
+          if (_annotatedImageBytes != null) ...[
             const SizedBox(height: 30),
             const Text(
               'Suggested Location:',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: emeraldColor),
             ),
-            if (_buttonLocation != null) ...[
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Text(
-                  _buttonLocation!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, color: Colors.white70),
+            
+            // הסבר AI למיקום - תמיד מוצג
+            const SizedBox(height: 15),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    emeraldColor.withOpacity(0.15),
+                    emeraldColor.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: emeraldColor.withOpacity(0.3)),
               ),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.lightbulb, color: emeraldColor, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        '🎯 Why This Location?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: emeraldColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _aiExplanation ?? '🔄 Generating placement analysis...',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
             if (_elementsToMove != null && _elementsToMove!.isNotEmpty) ...[
               const SizedBox(height: 15),
               Container(
@@ -1404,7 +1869,7 @@ Return the complete modified screenshot image.
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.file(_annotatedImage!),
+                child: Image.memory(_annotatedImageBytes!),
               ),
             ),
           ],
