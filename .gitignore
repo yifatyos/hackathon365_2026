@@ -46,3 +46,7 @@ app.*.map.json
 
 # API Keys - NEVER commit these!
 lib/config/api_keys.dart
+
+# Backend environment variables
+backend/.env
+backend/node_modules/

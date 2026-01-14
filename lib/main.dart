@@ -12,6 +12,7 @@ import 'dart:ui';
 import 'package:palette_generator/palette_generator.dart';
 import 'config/api_keys.dart'; // API keys - gitignored
 import 'services/database_service.dart'; // Database connection
+import 'screens/url_analyzer_screen.dart'; // URL Analyzer
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -301,16 +302,12 @@ class Navbar extends StatelessWidget {
                     const SizedBox(width: 16),
                     _navItem('Offers'),
                     const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      ),
-                      child: const Text('Start Earning', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                    ),
+                    _navItemButton('URL Scanner', () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UrlAnalyzerScreen()),
+                      );
+                    }),
                   ],
                 ),
               ],
@@ -349,16 +346,12 @@ class Navbar extends StatelessWidget {
               const SizedBox(width: 24),
               _navItem('Offers'),
               const SizedBox(width: 24),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: const Text('Start Earning', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+              _navItemButton('URL Scanner', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UrlAnalyzerScreen()),
+                );
+              }),
             ],
           ),
         ],
@@ -372,6 +365,26 @@ class Navbar extends StatelessWidget {
     return Text(
       title,
       style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+    );
+  }
+
+  Widget _navItemButton(String title, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: emeraldColor,
+        foregroundColor: Colors.black,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.analytics, size: 16),
+          const SizedBox(width: 6),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        ],
+      ),
     );
   }
 }
@@ -1338,7 +1351,7 @@ Return the modified screenshot with the banner strategically placed.
 
 
 
-      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=$apiKey');
+      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$apiKey');
 
       final requestBody = {
         'contents': [

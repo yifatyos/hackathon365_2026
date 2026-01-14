@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affiliate4U - AI Affiliate Optimization</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+body { font-family: 'Inter', sans-serif; background-color: #0B0F19; color: #E2E8F0; scroll-behavior: smooth; }
+h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
+
+.section-fade { transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; }
+.hidden-view { display: none !important; }
+.visible-view { display: block !important; animation: fadeIn 0.4s forwards; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.glass-panel { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+.glass-card { background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.6) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+.hero-glow { background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%); }
+.text-gradient { background: linear-gradient(135deg, #818CF8 0%, #C084FC 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.upload-zone { border: 2px dashed #475569; transition: all 0.3s; }
+.upload-zone:hover { border-color: #818CF8; background: rgba(129, 140, 248, 0.05); }
+
+.scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #818CF8; box-shadow: 0 0 10px #818CF8; animation: scan 2s linear infinite; display: none; }
+@keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+.floating { animation: float 6s ease-in-out infinite; }
+
+.offer-card { transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.05); }
+.offer-card:hover { transform: translateY(-2px); border-color: rgba(129, 140, 248, 0.3); }
+.offer-card.active { border-color: #34d399; background: rgba(16, 185, 129, 0.1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+.circuit-line { position: absolute; background: #4f46e5; opacity: 0.3; }
+.node-point { width: 8px; height: 8px; background: #818cf8; border-radius: 50%; box-shadow: 0 0 10px #818cf8; position: absolute; }
+
+@keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(129, 140, 248, 0.3); } 50% { box-shadow: 0 0 40px rgba(129, 140, 248, 0.6); } }
+.scanning { animation: pulse-glow 1.5s ease-in-out infinite; }
+</style>
+</head>
+<body class="overflow-x-hidden">
+
+<!-- MARKETING NAVBAR -->
+<nav id="marketing-nav" class="fixed w-full z-50 glass-panel border-b border-white/5 top-0">
+<div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+<div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('landing')">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+<i class="fa-solid fa-users-viewfinder text-white text-lg"></i>
+</div>
+<span class="text-xl font-bold tracking-tight">Affiliate4U</span>
+</div>
+
+<div class="hidden md:flex gap-8 text-sm font-medium text-slate-400">
+<a onclick="navigateTo('how-it-works')" class="hover:text-white transition cursor-pointer">How it Works</a>
+<a onclick="navigateTo('affiliates')" class="hover:text-white transition cursor-pointer">Global Network</a>
+<a onclick="navigateTo('success-stories')" class="hover:text-white transition cursor-pointer">Success Stories</a>
+</div>
+
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-sm font-semibold text-slate-300 hover:text-white transition">Sign In</button>
+<button onclick="enterAppMode()" class="px-6 py-2.5 rounded-full bg-white text-slate-900 font-semibold text-sm hover:bg-slate-200 transition shadow-lg shadow-white/10">
+Start Demo
+</button>
+</div>
+</div>
+</nav>
+
+<!-- APP NAVBAR -->
+<nav id="app-nav" class="fixed w-full z-50 glass-panel border-b border-white/5 top-0 hidden-view">
+<div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+<i class="fa-solid fa-robot text-indigo-400 text-sm"></i>
+</div>
+<span class="text-lg font-bold tracking-tight text-white">Affiliate4U <span class="text-indigo-400">Scanner</span></span>
+</div>
+<button onclick="exitAppMode()" class="text-sm font-medium text-slate-400 hover:text-white transition flex items-center gap-2">
+<i class="fa-solid fa-xmark"></i> Exit Demo
+</button>
+</div>
+</nav>
+
+<!-- === VIEW 1: LANDING PAGE === -->
+<div id="landing-view" class="visible-view">
+
+<!-- HERO -->
+<section id="landing" class="min-h-screen pt-32 pb-20 relative hero-glow flex items-center">
+<div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+<div class="space-y-8 z-10">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-indigo-500/30 text-indigo-300 text-xs font-medium uppercase tracking-wide">
+<span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+AI-Powered Monetization
+</div>
+<h1 class="text-5xl lg:text-7xl font-bold leading-tight">
+Don't just place ads. <br>
+<span class="text-gradient">Integrate them.</span>
+</h1>
+<p class="text-lg text-slate-400 max-w-xl leading-relaxed">
+Most affiliate links die in the footer. Affiliate4U analyzes your specific UI layout and injects high-converting sports betting offers exactly where your user's eye naturally falls.
+</p>
+<div class="flex gap-4 pt-4">
+<button onclick="enterAppMode()" class="px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold hover:shadow-lg hover:shadow-indigo-500/25 transition transform hover:-translate-y-1">
+Optimize My UI Now
+</button>
+<button onclick="navigateTo('how-it-works')" class="px-8 py-4 rounded-xl glass-panel text-white font-medium hover:bg-white/5 transition flex items-center gap-2">
+<i class="fa-solid fa-microchip text-xs"></i> Tech Specs
+</button>
+</div>
+</div>
+
+<div class="relative hidden lg:block z-10">
+<div class="absolute -inset-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl opacity-20 blur-2xl"></div>
+<div class="glass-panel rounded-2xl p-6 relative border border-white/10 floating">
+<div class="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-red-500"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+<div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+</div>
+<div class="text-xs text-slate-500">AI Analysis: Complete</div>
+</div>
+<div class="grid grid-cols-3 gap-4 h-80">
+<div class="col-span-2 bg-slate-800/50 rounded-lg p-4 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/80"></div>
+<div class="absolute bottom-4 left-4">
+<div class="text-xs text-indigo-400 mb-1">Detected: High Engagement Zone</div>
+<div class="text-white font-bold">Main Content Feed</div>
+</div>
+<div class="scan-line" style="display:block; animation-duration: 3s;"></div>
+</div>
+<div class="space-y-4">
+<div class="h-32 bg-slate-800/50 rounded-lg border-2 border-dashed border-slate-600 flex items-center justify-center">
+<span class="text-xs text-slate-500">Dead Space</span>
+</div>
+<div class="h-44 bg-gradient-to-br from-emerald-900/40 to-emerald-600/10 rounded-lg border border-emerald-500/50 p-3 relative">
+<div class="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-lg shadow-emerald-500/50">Recommended</div>
+<div class="text-xs text-emerald-300 font-bold mb-2">Offer Injection</div>
+<div class="w-full h-20 bg-emerald-500/20 rounded flex items-center justify-center text-emerald-200 text-xs">
+Sportingbet Banner
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="min-h-screen py-24 relative bg-[#0B0F19] overflow-hidden">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="circuit-line h-full w-[1px] left-[20%] top-0"></div>
+<div class="circuit-line h-full w-[1px] left-[50%] top-0"></div>
+<div class="circuit-line h-full w-[1px] left-[80%] top-0"></div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 relative z-10">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold mb-4">The Affiliate4U <span class="text-indigo-500">Neural Engine</span></h2>
+<p class="text-slate-400 max-w-2xl mx-auto">Our proprietary algorithm deconstructs your UI into a semantic grid and matches it with real-time liquidity from global bookmakers.</p>
+</div>
+
+<div class="grid md:grid-cols-4 gap-6">
+<div class="glass-card p-6 rounded-xl hover:-translate-y-2 transition duration-300 group">
+<div class="w-12 h-12 bg-indigo-900/50 rounded-lg flex items-center justify-center mb-4 border border-indigo-500/30">
+<i class="fa-solid fa-eye text-indigo-400 text-xl"></i>
+</div>
+<h3 class="text-lg font-bold text-white mb-2">1. Visual Ingestion</h3>
+<p class="text-sm text-slate-400">Computer Vision scans your UI and builds a heatmap of "safe zones" and "hot zones".</p>
+</div>
+
+<div class="glass-card p-6 rounded-xl hover:-translate-y-2 transition duration-300 group">
+<div class="w-12 h-12 bg-indigo-900/50 rounded-lg flex items-center justify-center mb-4 border border-indigo-500/30">
+<i class="fa-solid fa-fingerprint text-purple-400 text-xl"></i>
+</div>
+<h3 class="text-lg font-bold text-white mb-2">2. Psychographic Mapping</h3>
+<p class="text-sm text-slate-400">We analyze audience metadata and match content vibe with optimal offers.</p>
+</div>
+
+<div class="glass-card p-6 rounded-xl hover:-translate-y-2 transition duration-300 group">
+<div class="w-12 h-12 bg-indigo-900/50 rounded-lg flex items-center justify-center mb-4 border border-indigo-500/30">
+<i class="fa-solid fa-server text-emerald-400 text-xl"></i>
+</div>
+<h3 class="text-lg font-bold text-white mb-2">3. RTB Auction</h3>
+<p class="text-sm text-slate-400">We ping 50+ global bookmakers to find the highest CPA for your audience.</p>
+</div>
+
+<div class="glass-card p-6 rounded-xl hover:-translate-y-2 transition duration-300 group">
+<div class="w-12 h-12 bg-indigo-900/50 rounded-lg flex items-center justify-center mb-4 border border-indigo-500/30">
+<i class="fa-solid fa-code text-pink-400 text-xl"></i>
+</div>
+<h3 class="text-lg font-bold text-white mb-2">4. Native Injection</h3>
+<p class="text-sm text-slate-400">The final asset inherits YOUR CSS styling - looks like your dev team made it.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- AFFILIATES -->
+<section id="affiliates" class="py-24 bg-slate-900/50">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12">
+<div>
+<h2 class="text-3xl font-bold mb-2">Global Liquidity Network</h2>
+<p class="text-slate-400">Direct contracts with tier-1 operators across regulated markets.</p>
+</div>
+<span class="bg-indigo-600/20 text-indigo-400 px-4 py-2 rounded-lg text-sm font-mono border border-indigo-500/30">
+<i class="fa-solid fa-globe mr-2"></i>50+ Partners
+</span>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="glass-panel p-5 rounded-lg border-l-2 border-l-green-500">
+<div class="flex items-center gap-2 font-bold text-white mb-3"><span class="text-lg">🇧🇷</span> Brazil</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">Sportingbet</span>
+<span class="text-emerald-400 font-mono text-xs">CPA $45</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">SuperBet</span>
+<span class="text-emerald-400 font-mono text-xs">Rev 35%</span>
+</div>
+</div>
+</div>
+
+<div class="glass-panel p-5 rounded-lg border-l-2 border-l-blue-600">
+<div class="flex items-center gap-2 font-bold text-white mb-3"><span class="text-lg">🇮🇹</span> Italy</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">Lottomatica</span>
+<span class="text-emerald-400 font-mono text-xs">CPA €140</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">888</span>
+<span class="text-emerald-400 font-mono text-xs">CPA €160</span>
+</div>
+</div>
+</div>
+
+<div class="glass-panel p-5 rounded-lg border-l-2 border-l-red-500">
+<div class="flex items-center gap-2 font-bold text-white mb-3"><span class="text-lg">🇨🇦</span> Canada</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">Sports Int.</span>
+<span class="text-emerald-400 font-mono text-xs">CPA $220</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">BetVictor</span>
+<span class="text-emerald-400 font-mono text-xs">CPA $200</span>
+</div>
+</div>
+</div>
+
+<div class="glass-panel p-5 rounded-lg border-l-2 border-l-sky-400">
+<div class="flex items-center gap-2 font-bold text-white mb-3"><span class="text-lg">🇦🇷</span> Argentina</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">Betwarrior</span>
+<span class="text-emerald-400 font-mono text-xs">Rev 30%</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-white">Codere</span>
+<span class="text-emerald-400 font-mono text-xs">CPA $40</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- SUCCESS STORIES -->
+<section id="success-stories" class="py-24">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold mb-4">Optimization <span class="text-emerald-400">Success Stories</span></h2>
+<p class="text-slate-400">Real results from partners who stopped pasting links and started integrating smart UI.</p>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-8">
+<div class="glass-card rounded-2xl overflow-hidden">
+<div class="h-48 bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center">
+<div class="text-center">
+<div class="text-5xl font-bold text-white">+310%</div>
+<div class="text-indigo-300">Revenue Increase</div>
+</div>
+</div>
+<div class="p-6">
+<div class="text-xs font-bold text-indigo-400 mb-2 uppercase">Mobile App</div>
+<h3 class="text-lg font-bold text-white mb-3">"LiveScore" Utility App</h3>
+<p class="text-sm text-slate-400">Native "Match Odds" cards between goal notifications. 4.8% CTR.</p>
+</div>
+</div>
+
+<div class="glass-card rounded-2xl overflow-hidden">
+<div class="h-48 bg-gradient-to-br from-pink-900 to-red-900 flex items-center justify-center">
+<div class="text-center">
+<div class="text-5xl font-bold text-white">40k</div>
+<div class="text-pink-300">Clicks/Month</div>
+</div>
+</div>
+<div class="p-6">
+<div class="text-xs font-bold text-pink-400 mb-2 uppercase">Social Bio</div>
+<h3 class="text-lg font-bold text-white mb-3">Football Influencer (IG)</h3>
+<p class="text-sm text-slate-400">"Daily Bet Builder" widget replaced standard link page. 12% conversion.</p>
+</div>
+</div>
+
+<div class="glass-card rounded-2xl overflow-hidden">
+<div class="h-48 bg-gradient-to-br from-emerald-900 to-teal-900 flex items-center justify-center">
+<div class="text-center">
+<div class="text-5xl font-bold text-white">$15k</div>
+<div class="text-emerald-300">Monthly Passive</div>
+</div>
+</div>
+<div class="p-6">
+<div class="text-xs font-bold text-emerald-400 mb-2 uppercase">Web Overlay</div>
+<h3 class="text-lg font-bold text-white mb-3">Stats Analysis Blog</h3>
+<p class="text-sm text-slate-400">Dynamic odds tables injected into article sidebars automatically.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<!-- === VIEW 2: APP MODE === -->
+<div id="app-view" class="hidden-view min-h-screen bg-[#0B0F19] pt-24 pb-12">
+
+<!-- SCANNER SECTION -->
+<section id="onboarding" class="visible-view pt-8 pb-20">
+<div class="max-w-3xl mx-auto px-6">
+<div class="text-center mb-8">
+<h2 class="text-3xl font-bold mb-4">Let's Scan Your Interface</h2>
+<p class="text-slate-400">Upload a screenshot and select a bookie. AI will find the perfect spot.</p>
+</div>
+
+<div class="glass-panel rounded-2xl p-8 border border-indigo-500/20 shadow-2xl shadow-indigo-900/20">
+
+<!-- Step 1: Input Method Tabs -->
+<div class="mb-8">
+<label class="block text-sm font-medium text-slate-300 mb-3 flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-xs">1</span>
+Choose Input Method
+</label>
+
+<!-- Tab Buttons -->
+<div class="flex gap-2 mb-4">
+<button id="tabUpload" onclick="switchTab('upload')" class="flex-1 py-3 px-4 rounded-lg bg-indigo-600 text-white font-medium transition flex items-center justify-center gap-2">
+<i class="fa-solid fa-image"></i> Upload Screenshot
+</button>
+<button id="tabUrl" onclick="switchTab('url')" class="flex-1 py-3 px-4 rounded-lg bg-slate-700 text-slate-300 font-medium transition hover:bg-slate-600 flex items-center justify-center gap-2">
+<i class="fa-solid fa-link"></i> Enter URL
+</button>
+</div>
+
+<!-- Upload Tab Content -->
+<div id="uploadTab" class="block">
+<div id="dropZone" class="upload-zone rounded-xl p-10 text-center cursor-pointer bg-slate-800/30">
+<input type="file" id="fileInput" class="hidden" accept="image/*">
+<div id="uploadPrompt">
+<i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-500 mb-4"></i>
+<p class="text-sm text-slate-300 font-medium">Click to upload or drag & drop</p>
+<p class="text-xs text-slate-500 mt-2">PNG, JPG (Max 10MB)</p>
+</div>
+<div id="uploadPreview" class="hidden">
+<img id="previewImg" src="" class="max-h-48 mx-auto rounded-lg mb-3">
+<button type="button" onclick="clearUpload()" class="text-sm text-red-400 hover:text-red-300">
+<i class="fa-solid fa-xmark mr-1"></i> Remove
+</button>
+</div>
+</div>
+</div>
+
+<!-- URL Tab Content -->
+<div id="urlTab" class="hidden">
+<div class="bg-slate-800/30 rounded-xl p-6 border border-slate-600/50">
+<div class="flex gap-3">
+<div class="flex-1 relative">
+<i class="fa-solid fa-globe absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+<input type="text" id="urlInput" placeholder="https://example.com" 
+  class="w-full bg-slate-900/50 border border-slate-600 rounded-lg py-3 pl-11 pr-4 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+</div>
+</div>
+<p class="text-xs text-slate-500 mt-3">
+<i class="fa-solid fa-info-circle mr-1"></i> We'll capture a mobile screenshot of this URL and analyze it
+</p>
+<!-- URL Screenshot Preview -->
+<div id="urlPreview" class="hidden mt-4">
+<p class="text-sm text-emerald-400 mb-2"><i class="fa-solid fa-check mr-1"></i> Screenshot captured:</p>
+<img id="urlPreviewImg" src="" class="max-h-48 mx-auto rounded-lg border border-slate-600">
+</div>
+</div>
+</div>
+</div>
+
+<!-- Step 2: Select Bookie -->
+<div class="mb-8">
+<label class="block text-sm font-medium text-slate-300 mb-3 flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-xs">2</span>
+Select Bookie
+</label>
+<div class="grid grid-cols-3 gap-4">
+<div class="offer-card glass-card rounded-xl p-4 cursor-pointer active" onclick="selectBookie('Sportingbet', '#1E3A5F', this)">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-white p-1 flex items-center justify-center">
+<img src="https://logo.clearbit.com/sportingbet.com" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=SB&background=1E3A5F&color=fff'">
+</div>
+<div>
+<div class="text-white font-bold text-sm">Sportingbet</div>
+<div class="text-xs text-slate-400">CPA $45</div>
+</div>
+</div>
+</div>
+
+<div class="offer-card glass-card rounded-xl p-4 cursor-pointer" onclick="selectBookie('bet365', '#006600', this)">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-white p-1 flex items-center justify-center">
+<img src="https://logo.clearbit.com/bet365.com" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=365&background=006600&color=fff'">
+</div>
+<div>
+<div class="text-white font-bold text-sm">bet365</div>
+<div class="text-xs text-slate-400">CPA $150</div>
+</div>
+</div>
+</div>
+
+<div class="offer-card glass-card rounded-xl p-4 cursor-pointer" onclick="selectBookie('Betwarrior', '#FF4500', this)">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-white p-1 flex items-center justify-center">
+<img src="https://logo.clearbit.com/betwarrior.com" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=BW&background=FF4500&color=fff'">
+</div>
+<div>
+<div class="text-white font-bold text-sm">Betwarrior</div>
+<div class="text-xs text-slate-400">Rev 30%</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Scan Button -->
+<button id="scanBtn" onclick="startScan()" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold hover:shadow-lg hover:shadow-indigo-500/25 transition">
+<i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Generate AI Banner Placement
+</button>
+
+<!-- Loading State -->
+<div id="loadingState" class="hidden mt-6 text-center">
+<div class="inline-flex items-center gap-4 px-8 py-5 rounded-xl glass-card scanning">
+<i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-400"></i>
+<div class="text-left">
+<p class="text-white font-medium text-lg" id="loadingText">Analyzing screenshot...</p>
+<p class="text-sm text-slate-400">This may take 30-60 seconds</p>
+</div>
+</div>
+</div>
+
+<!-- Error State -->
+<div id="errorState" class="hidden mt-6">
+<div class="bg-red-900/30 border border-red-500/50 rounded-xl p-4 flex items-center gap-3">
+<i class="fa-solid fa-exclamation-circle text-red-400 text-xl"></i>
+<p class="text-red-300" id="errorText">An error occurred</p>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- RESULT SECTION -->
+<section id="results" class="hidden-view">
+<div class="max-w-5xl mx-auto px-6">
+<div class="glass-panel rounded-2xl p-8">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-2xl font-bold text-white flex items-center gap-3">
+<i class="fa-solid fa-check-circle text-emerald-400"></i> AI Generated Result
+</h3>
+<button onclick="resetApp()" class="text-slate-400 hover:text-white flex items-center gap-2">
+<i class="fa-solid fa-arrow-left"></i> Scan Another
+</button>
+</div>
+<div class="bg-black/50 rounded-xl p-6 flex items-center justify-center">
+<img id="resultImage" src="" class="max-w-full max-h-[70vh] rounded-lg border-2 border-emerald-500/50">
+</div>
+<div class="mt-6 flex justify-center gap-4">
+<a id="downloadBtn" download="banner_mockup.png" class="px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition">
+<i class="fa-solid fa-download mr-2"></i> Download Image
+</a>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+
+<script>
+// ========== CONFIGURATION ==========
+const GEMINI_API_KEY = 'AIzaSyBLZUPPp0Abkw1QGxw_PBhaUWsbxhvBTDA';
+const GEMINI_MODEL = 'gemini-2.5-flash-image-preview';
+const BACKEND_URL = 'http://localhost:3000';
+
+// ========== STATE ==========
+let uploadedImageBase64 = null;
+let selectedBookie = { name: 'Sportingbet', color: '#1E3A5F' };
+let activeTab = 'upload'; // 'upload' or 'url'
+let urlScreenshotBase64 = null;
+
+// ========== NAVIGATION ==========
+function navigateTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+function enterAppMode() {
+    document.getElementById('landing-view').classList.add('hidden-view');
+    document.getElementById('landing-view').classList.remove('visible-view');
+    document.getElementById('app-view').classList.remove('hidden-view');
+    document.getElementById('app-view').classList.add('visible-view');
+    document.getElementById('marketing-nav').classList.add('hidden-view');
+    document.getElementById('app-nav').classList.remove('hidden-view');
+    resetApp();
+    window.scrollTo(0, 0);
+}
+
+function exitAppMode() {
+    document.getElementById('app-view').classList.add('hidden-view');
+    document.getElementById('landing-view').classList.remove('hidden-view');
+    document.getElementById('landing-view').classList.add('visible-view');
+    document.getElementById('app-nav').classList.add('hidden-view');
+    document.getElementById('marketing-nav').classList.remove('hidden-view');
+    window.scrollTo(0, 0);
+}
+
+function resetApp() {
+    document.getElementById('results').classList.add('hidden-view');
+    document.getElementById('onboarding').classList.remove('hidden-view');
+    document.getElementById('onboarding').classList.add('visible-view');
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+    document.getElementById('scanBtn').disabled = false;
+}
+
+// ========== FILE UPLOAD ==========
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#818CF8'; });
+dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#475569');
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '#475569';
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+
+function handleFile(file) {
+    if (!file.type.startsWith('image/')) return alert('Please upload an image');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        uploadedImageBase64 = e.target.result.split(',')[1];
+        document.getElementById('previewImg').src = e.target.result;
+        document.getElementById('uploadPrompt').classList.add('hidden');
+        document.getElementById('uploadPreview').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearUpload() {
+    uploadedImageBase64 = null;
+    fileInput.value = '';
+    document.getElementById('uploadPrompt').classList.remove('hidden');
+    document.getElementById('uploadPreview').classList.add('hidden');
+}
+
+// ========== TAB SWITCHING ==========
+function switchTab(tab) {
+    activeTab = tab;
+    const tabUpload = document.getElementById('tabUpload');
+    const tabUrl = document.getElementById('tabUrl');
+    const uploadContent = document.getElementById('uploadTab');
+    const urlContent = document.getElementById('urlTab');
+    
+    if (tab === 'upload') {
+        tabUpload.className = 'flex-1 py-3 px-4 rounded-lg bg-indigo-600 text-white font-medium transition flex items-center justify-center gap-2';
+        tabUrl.className = 'flex-1 py-3 px-4 rounded-lg bg-slate-700 text-slate-300 font-medium transition hover:bg-slate-600 flex items-center justify-center gap-2';
+        uploadContent.classList.remove('hidden');
+        urlContent.classList.add('hidden');
+    } else {
+        tabUrl.className = 'flex-1 py-3 px-4 rounded-lg bg-indigo-600 text-white font-medium transition flex items-center justify-center gap-2';
+        tabUpload.className = 'flex-1 py-3 px-4 rounded-lg bg-slate-700 text-slate-300 font-medium transition hover:bg-slate-600 flex items-center justify-center gap-2';
+        urlContent.classList.remove('hidden');
+        uploadContent.classList.add('hidden');
+    }
+}
+
+// ========== BOOKIE SELECTION ==========
+function selectBookie(name, color, element) {
+    selectedBookie = { name, color };
+    document.querySelectorAll('.offer-card').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+}
+
+// ========== AI SCAN ==========
+async function startScan() {
+    let imageToAnalyze = null;
+    
+    // Check which tab is active
+    if (activeTab === 'upload') {
+        if (!uploadedImageBase64) {
+            alert('Please upload a screenshot first');
+            return;
+        }
+        imageToAnalyze = uploadedImageBase64;
+    } else {
+        // URL tab
+        const urlInput = document.getElementById('urlInput').value.trim();
+        if (!urlInput) {
+            alert('Please enter a URL');
+            return;
+        }
+        
+        // First, get screenshot from backend
+        document.getElementById('scanBtn').disabled = true;
+        document.getElementById('loadingState').classList.remove('hidden');
+        document.getElementById('loadingText').textContent = '📸 Taking screenshot of URL...';
+        
+        try {
+            const screenshotResult = await getScreenshotFromUrl(urlInput);
+            imageToAnalyze = screenshotResult;
+            
+            // Show preview
+            document.getElementById('urlPreviewImg').src = 'data:image/png;base64,' + screenshotResult;
+            document.getElementById('urlPreview').classList.remove('hidden');
+        } catch (error) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorText').textContent = 'Failed to capture URL: ' + error.message;
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('scanBtn').disabled = false;
+            return;
+        }
+    }
+
+    document.getElementById('scanBtn').disabled = true;
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+
+    const loadingMessages = ['🔍 Analyzing screenshot layout...', '🎯 Detecting optimal zones...', '🎨 Generating banner design...', '✨ Finalizing mockup...'];
+    let msgIndex = 0;
+    const msgInterval = setInterval(() => {
+        msgIndex = (msgIndex + 1) % loadingMessages.length;
+        document.getElementById('loadingText').textContent = loadingMessages[msgIndex];
+    }, 3000);
+
+    try {
+        const result = await callGeminiAPI(imageToAnalyze, selectedBookie.name, selectedBookie.color);
+        clearInterval(msgInterval);
+        document.getElementById('loadingState').classList.add('hidden');
+        
+        const resultImg = document.getElementById('resultImage');
+        resultImg.src = 'data:image/png;base64,' + result;
+        document.getElementById('downloadBtn').href = resultImg.src;
+        
+        document.getElementById('onboarding').classList.add('hidden-view');
+        document.getElementById('results').classList.remove('hidden-view');
+        document.getElementById('results').classList.add('visible-view');
+        
+    } catch (error) {
+        clearInterval(msgInterval);
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorText').textContent = error.message;
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('scanBtn').disabled = false;
+    }
+}
+
+// ========== GET SCREENSHOT FROM URL ==========
+async function getScreenshotFromUrl(url) {
+    let fullUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        fullUrl = 'https://' + url;
+    }
+    
+    console.log('📸 Requesting screenshot for:', fullUrl);
+    
+    const response = await fetch(`${BACKEND_URL}/screenshot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fullUrl })
+    });
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Backend error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success || !data.image) {
+        throw new Error('Failed to capture screenshot');
+    }
+    
+    console.log('✅ Screenshot received!');
+    return data.image;
+}
+
+// ========== GEMINI API - SAME AS MAIN.DART ==========
+async function callGeminiAPI(base64Image, bookieName, colorHex) {
+    
+    let buttonDescription = '';
+    switch (bookieName) {
+        case 'Sportingbet':
+            buttonDescription = `BUTTON DESIGN (Sportingbet):
+- Background: Blue gradient (${colorHex})
+- Text: "Sportingbet - Bet Now!" in WHITE, bold
+- Style: Professional sports betting look
+- Include a small sports icon or betting symbol if possible`;
+            break;
+        case 'bet365':
+            buttonDescription = `BUTTON DESIGN (bet365):
+- Background: Dark green (${colorHex})
+- Text: "bet365 - Bet Now!" in WHITE/YELLOW, bold
+- Style: Clean, professional bet365 branding
+- The "365" part can be in yellow/gold`;
+            break;
+        case 'Betwarrior':
+            buttonDescription = `BUTTON DESIGN (Betwarrior):
+- Background: Red/Orange gradient (${colorHex})
+- Text: "Betwarrior - Bet Now!" in WHITE, bold
+- Style: Bold, aggressive warrior theme`;
+            break;
+        default:
+            buttonDescription = `BUTTON DESIGN:
+- Background: ${colorHex}
+- Text: "${bookieName} - Bet Now!" in WHITE, bold`;
+    }
+
+    const prompt = `Add a "${bookieName}" banner to this screenshot.
+
+EXACT PLACEMENT INSTRUCTION:
+Place the banner BETWEEN TWO LEAGUE SECTIONS - in the white/gray gap area between collapsed league headers (like between "Brasileiro Serie A" and "Ligue 1", or between "Ligue 1" and "Serie A").
+
+These gap areas are EMPTY SPACE - placing banner there covers NOTHING.
+
+If no gap exists, place banner at the VERY BOTTOM of the screen, just above the bottom navigation bar.
+
+${buttonDescription}
+
+BANNER DESIGN:
+- Full width
+- Height: 50-60px
+- Rounded corners
+- Text: "${bookieName} - Bet Now!" ⚽
+
+🚫 DO NOT place banner:
+- On top of match rows
+- On top of odds numbers
+- On top of team names
+- Inside any content card
+
+✅ ONLY place banner in:
+- Empty gap between sections
+- Or at very bottom above nav bar
+
+Return the modified image.`;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
+    const requestBody = {
+        contents: [{
+            parts: [
+                { text: prompt },
+                { inline_data: { mime_type: 'image/png', data: base64Image } }
+            ]
+        }],
+        generationConfig: {
+            response_modalities: ['IMAGE'],
+            temperature: 0.1
+        }
+    };
+
+    console.log('📤 Calling Gemini API...');
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+    });
+
+    console.log('📥 Response:', response.status);
+
+    if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.candidates?.[0]?.content?.parts) {
+        for (const part of data.candidates[0].content.parts) {
+            const inlineData = part.inlineData || part.inline_data;
+            if (inlineData?.data && (inlineData.mimeType || inlineData.mime_type)?.startsWith('image/')) {
+                console.log('✅ Got image from Gemini!');
+                return inlineData.data;
+            }
+            if (part.text) {
+                throw new Error('AI returned text: ' + part.text.substring(0, 100));
+            }
+        }
+    }
+    throw new Error('No image in response');
+}
+</script>
+</body>
+</html>

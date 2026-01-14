@@ -1,0 +1,20 @@
+{
+  "name": "url-analyzer-backend",
+  "version": "1.0.0",
+  "description": "Backend for URL analysis using Puppeteer and Gemini AI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["puppeteer", "gemini", "ai", "screenshot"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "puppeteer": "^21.11.0"
+  }
+}
